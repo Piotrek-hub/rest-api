@@ -1,7 +1,7 @@
 package main
 
-import "log"
+import "rest-api/api"
 
 func main() {
-	log.Println("Hello World")
+	api.Serve()
 }
