@@ -2,6 +2,7 @@ package db
 
 import (
 	"errors"
+	"log"
 	. "rest-api/db/models"
 )
 
@@ -14,7 +15,11 @@ func NewPetFactory() *PetFactory {
 }
 
 // Create
-func (this *PetFactory) NewPet(name, breed string) {
+func (this *PetFactory) NewPet(name, breed string) error {
+	log.Println(name, breed)
+	if name == "" || breed == "" {
+		return errors.New("Provide all information about pet")
+	}
 	newPet := &Pet{
 		ID:    uint(len(this.pets)),
 		Name:  name,
@@ -22,6 +27,8 @@ func (this *PetFactory) NewPet(name, breed string) {
 	}
 
 	this.pets = append(this.pets, newPet)
+
+	return nil
 }
 
 // Read

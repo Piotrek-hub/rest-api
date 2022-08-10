@@ -1,11 +1,19 @@
 package api
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
-
-	"rest-api/db"
+	db "rest-api/db"
+	models "rest-api/db/models"
 )
+
+type GetPetsResponse struct {
+	Status string
+	Pets   []*models.Pet
+}
+
+var petFactory = db.NewPetFactory()
 
 func petsHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
@@ -14,10 +22,25 @@ func petsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		// Get pets
-		pets := db.GetAllPets()
-		log.Println(pets)
+		pets := petFactory.GetAllPets()
+		resp := GetPetsResponse{
+			Status: "ok",
+			Pets:   pets,
+		}
+
+		json.NewEncoder(w).Encode(resp)
 	case "POST":
-		log.Println("POST")
+		r.ParseForm()
+
+		name := r.FormValue("name")
+		breed := r.FormValue("breed")
+
+		if err := petFactory.NewPet(name, breed); err != nil {
+			w.Write([]byte(err.Error()))
+		} else {
+			w.Write([]byte("Pet created succesfully"))
+		}
+
 	case "UPDATE":
 		log.Println("UPDATE")
 	case "DELETE":
