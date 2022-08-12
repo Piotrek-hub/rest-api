@@ -2,7 +2,6 @@ package db
 
 import (
 	"errors"
-	"log"
 	. "rest-api/db/models"
 )
 
@@ -16,7 +15,6 @@ func NewPetFactory() *PetFactory {
 
 // Create
 func (this *PetFactory) NewPet(name, breed string) error {
-	log.Println(name, breed)
 	if name == "" || breed == "" {
 		return errors.New("Provide all information about pet")
 	}

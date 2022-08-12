@@ -5,29 +5,32 @@ import (
 	"log"
 	"net/http"
 	db "rest-api/db"
-	models "rest-api/db/models"
+	"rest-api/db/models"
 )
 
-type GetPetsResponse struct {
-	Status string
-	Pets   []*models.Pet
+type ResponseContent interface {
+	*models.Pet | []*models.Pet | string
+}
+
+type Response[T ResponseContent] struct {
+	Status  string `json:"status"` // ok, error
+	Content T      `json:"content"`
 }
 
 var petFactory = db.NewPetFactory()
 
 func petsHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 
 	switch r.Method {
 	case "GET":
 		// Get pets
 		pets := petFactory.GetAllPets()
-		resp := GetPetsResponse{
-			Status: "ok",
-			Pets:   pets,
+		resp := Response[[]*models.Pet]{
+			Status:  "ok",
+			Content: pets,
 		}
-
+		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(resp)
 	case "POST":
 		r.ParseForm()
@@ -36,9 +39,11 @@ func petsHandler(w http.ResponseWriter, r *http.Request) {
 		breed := r.FormValue("breed")
 
 		if err := petFactory.NewPet(name, breed); err != nil {
-			w.Write([]byte(err.Error()))
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(Response[string]{Status: "error", Content: err.Error()})
 		} else {
-			w.Write([]byte("Pet created succesfully"))
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(Response[string]{Status: "ok", Content: "pet added successfully"})
 		}
 
 	case "UPDATE":
