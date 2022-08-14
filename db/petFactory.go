@@ -97,15 +97,30 @@ func (this *PetFactory) UpdatePetsBreed(id string, newBreed string) error {
 }
 
 func (this *PetFactory) DeletePet(id string) error {
-	pet, err := this.GetPetById(id)
-	if err != nil {
-		return err
-	}
-	idx, err := strconv.Atoi(pet.ID)
+	var newPets []*Pet
+	idx, err := strconv.Atoi(id)
 	if err != nil {
 		return err
 	}
 
-	this.pets[idx] = nil
+	if idx > len(this.pets)-1 {
+		return errors.New("ID out of range")
+	}
+
+	for i := 0; i < len(this.pets); i++ {
+		if this.pets[i].ID != id {
+			if i >= idx {
+				tmpID, err := strconv.Atoi(this.pets[i].ID)
+				if err != nil {
+					return err
+				}
+				this.pets[i].ID = strconv.Itoa(tmpID - 1)
+			}
+
+			newPets = append(newPets, this.pets[i])
+		}
+	}
+
+	this.pets = newPets
 	return nil
 }
