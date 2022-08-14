@@ -3,6 +3,7 @@ package db
 import (
 	"errors"
 	. "rest-api/db/models"
+	"strconv"
 )
 
 type PetFactory struct {
@@ -13,13 +14,12 @@ func NewPetFactory() *PetFactory {
 	return &PetFactory{}
 }
 
-// Create
 func (this *PetFactory) NewPet(name, breed string) error {
 	if name == "" || breed == "" {
 		return errors.New("Provide all information about pet")
 	}
 	newPet := &Pet{
-		ID:    uint(len(this.pets)),
+		ID:    strconv.Itoa(len(this.pets)),
 		Name:  name,
 		Breed: breed,
 	}
@@ -29,13 +29,11 @@ func (this *PetFactory) NewPet(name, breed string) error {
 	return nil
 }
 
-// Read
-
 func (this *PetFactory) GetAllPets() []*Pet {
 	return this.pets
 }
 
-func (this *PetFactory) GetPetById(id uint) (*Pet, error) {
+func (this *PetFactory) GetPetById(id string) (*Pet, error) {
 	for _, pet := range this.pets {
 		if pet.ID == id {
 			return pet, nil
@@ -55,8 +53,23 @@ func (this *PetFactory) GetPetByName(name string) (*Pet, error) {
 	return nil, errors.New("Pet not found, probably bad name")
 }
 
+func (this *PetFactory) GetPetsByBreed(breed string) ([]*Pet, error) {
+	var pets []*Pet
+	for _, pet := range this.pets {
+		if pet.Breed == breed {
+			pets = append(pets, pet)
+		}
+	}
+
+	if len(pets) == 0 {
+		return nil, errors.New("No pets with this breed")
+	} else {
+		return pets, nil
+	}
+}
+
 // Update
-func (this *PetFactory) UpdatePetsName(id uint, newName string) error {
+func (this *PetFactory) UpdatePetsName(id string, newName string) error {
 	pet, err := this.GetPetById(id)
 	if err != nil {
 		return err
@@ -67,7 +80,7 @@ func (this *PetFactory) UpdatePetsName(id uint, newName string) error {
 	return nil
 }
 
-func (this *PetFactory) UpdatePetsBreed(id uint, newBreed string) error {
+func (this *PetFactory) UpdatePetsBreed(id string, newBreed string) error {
 	pet, err := this.GetPetById(id)
 	if err != nil {
 		return err

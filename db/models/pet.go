@@ -1,7 +1,7 @@
 package models
 
 type Pet struct {
-	ID    uint
+	ID    string
 	Name  string
 	Breed string
 }
