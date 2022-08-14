@@ -22,11 +22,11 @@ func GetPetsHandler(r *http.Request) ([]*models.Pet, error) {
 	query := r.URL.Query()
 
 	if name, ok := query["name"]; ok {
-		pets, err := pf.GetPetByName(name[0])
+		pets, err := pf.GetPetsByName(name[0])
 		if err != nil {
 			return nil, err
 		}
-		return []*models.Pet{pets}, nil
+		return pets, nil
 	}
 
 	if id, ok := query["id"]; ok {
@@ -84,6 +84,13 @@ func UpdatePetHandler(r *http.Request) error {
 	return errors.New("Please provide more data")
 }
 
-func DeletePetHandler() {
+func DeletePetHandler(r *http.Request) error {
+	query := r.URL.Query()
+	id, ok := query["id"]
+	if !ok {
+		return errors.New("Pet ID missing")
+	}
 
+	err := pf.DeletePet(id[0])
+	return err
 }

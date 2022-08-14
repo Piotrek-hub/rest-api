@@ -43,14 +43,19 @@ func (this *PetFactory) GetPetById(id string) (*Pet, error) {
 	return nil, errors.New("Pet not found, probably bad ID")
 }
 
-func (this *PetFactory) GetPetByName(name string) (*Pet, error) {
+func (this *PetFactory) GetPetsByName(name string) ([]*Pet, error) {
+	var pets []*Pet
 	for _, pet := range this.pets {
 		if pet.Name == name {
-			return pet, nil
+			pets = append(pets, pet)
 		}
 	}
 
-	return nil, errors.New("Pet not found, probably bad name")
+	if len(pets) == 0 {
+		return nil, errors.New("No pets with this name")
+	} else {
+		return pets, nil
+	}
 }
 
 func (this *PetFactory) GetPetsByBreed(breed string) ([]*Pet, error) {
@@ -88,5 +93,19 @@ func (this *PetFactory) UpdatePetsBreed(id string, newBreed string) error {
 
 	pet.Breed = newBreed
 
+	return nil
+}
+
+func (this *PetFactory) DeletePet(id string) error {
+	pet, err := this.GetPetById(id)
+	if err != nil {
+		return err
+	}
+	idx, err := strconv.Atoi(pet.ID)
+	if err != nil {
+		return err
+	}
+
+	this.pets[idx] = nil
 	return nil
 }

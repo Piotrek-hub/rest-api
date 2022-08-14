@@ -39,7 +39,13 @@ func petsHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(Response[string]{Status: "ok", Content: "Pet updated successfully"})
 
 	case "DELETE":
-		log.Println("DELETE")
+		err := DeletePetHandler(r)
+		if err != nil {
+			Error(w, err)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(Response[string]{Status: "ok", Content: "Pet deleted successfully"})
 	default:
 		w.WriteHeader(http.StatusNotFound)
 	}
